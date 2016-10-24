@@ -1,0 +1,15 @@
+# mapchete parameters
+process_file: example_process.py
+process_minzoom: 8
+process_maxzoom: 12
+input_files:
+    file1: None
+
+output:
+    type: geodetic
+    dtype: uint8
+    bands: 3
+    format: GTiff
+    path: tmp
+
+metatiling: 8
