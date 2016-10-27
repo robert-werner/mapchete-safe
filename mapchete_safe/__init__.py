@@ -80,11 +80,10 @@ class InputTile(base.InputTile):
     def read(self, indexes=None):
         """Generate reprojected numpy arrays from input file bands."""
         band_indexes = self._get_band_indexes(indexes)
-
         if len(band_indexes) == 1:
             return self._bands_from_cache(indexes=band_indexes).next()
         else:
-            return self._bands_from_cache(indexes=band_indexes)
+            return np.stack(self._bands_from_cache(indexes=band_indexes))
 
     def is_empty(self, indexes=None):
         """Return true if all items are masked."""
@@ -134,7 +133,7 @@ class InputTile(base.InputTile):
         band_indexes = self._get_band_indexes(indexes)
         for band_index in band_indexes:
             if band_index not in self._np_band_cache:
-                if len(self._get_band_paths(band_index)) == 0:
+                if not len(self._get_band_paths(band_index)):
                     band = ma.masked_array(
                         np.zeros(
                             self.tile.shape, dtype=self.dtype), mask=True)
@@ -161,5 +160,6 @@ class InputTile(base.InputTile):
                             data=np.where(band.mask, srid_band, band),
                             mask=np.where(band.mask, srid_band.mask, band.mask)
                             )
+                    del srid_bands
                 self._np_band_cache[band_index] = band
             yield self._np_band_cache[band_index]
