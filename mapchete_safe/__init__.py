@@ -83,7 +83,17 @@ class InputTile(base.InputTile):
         if len(band_indexes) == 1:
             return self._bands_from_cache(indexes=band_indexes).next()
         else:
-            return np.stack(self._bands_from_cache(indexes=band_indexes))
+            return ma.masked_array(
+                data=np.stack(self._bands_from_cache(indexes=band_indexes)),
+                mask=np.stack(
+                    self.mask()
+                    for band in band_indexes
+                    )
+                )
+
+    def mask(self):
+        """Nondata mask."""
+        return self._bands_from_cache(2).next().mask
 
     def is_empty(self, indexes=None):
         """Return true if all items are masked."""
@@ -133,33 +143,20 @@ class InputTile(base.InputTile):
         band_indexes = self._get_band_indexes(indexes)
         for band_index in band_indexes:
             if band_index not in self._np_band_cache:
+                empty_band = ma.masked_array(
+                    ma.zeros(self.tile.shape, dtype=self.dtype), mask=True)
                 if not len(self._get_band_paths(band_index)):
-                    band = ma.masked_array(
-                        np.zeros(
-                            self.tile.shape, dtype=self.dtype), mask=True)
+                    band = empty_band
                 else:
-                    # Create VRT for granules sorted by SRID and combine
-                    # outputs to one band:
-                    srid_bands = ()
-                    for paths in self._get_band_paths(band_index).values():
-                        temp_vrt = NamedTemporaryFile()
-                        raster_file = temp_vrt.name
-                        build_vrt = "gdalbuildvrt %s %s > /dev/null" % (
-                            raster_file, ' '.join(paths))
-                        try:
-                            os.system(build_vrt)
-                        except:
-                            raise IOError("build temporary VRT failed")
-                        srid_bands += (read_raster_window(
-                            raster_file, self.tile, indexes=1,
-                            resampling=self.resampling).next(), )
-                    band = ma.masked_array(
-                        ma.zeros(self.tile.shape, dtype=self.dtype), mask=True)
-                    for srid_band in srid_bands:
+                    band = empty_band
+                    for granule in self.s2metadata["granules"]:
+                        new_data = read_raster_window(
+                            granule["band_path"][band_index], self.tile,
+                            indexes=1, resampling=self.resampling).next()
                         band = ma.masked_array(
-                            data=np.where(band.mask, srid_band, band),
-                            mask=np.where(band.mask, srid_band.mask, band.mask)
+                            data=np.where(band.mask, new_data.data, band.data),
+                            mask=np.where(
+                                band.mask, new_data.mask, band.mask)
                             )
-                    del srid_bands
                 self._np_band_cache[band_index] = band
             yield self._np_band_cache[band_index]
