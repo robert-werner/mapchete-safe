@@ -34,28 +34,38 @@ def main(args):
     process = Mapchete(config)
     out_dir = os.path.join(scriptdir, "testdata/tmp")
 
+    maxtiles = 5
+    current = 0
     for tile in process.get_process_tiles(12):
         output = process.execute(tile)
         process.write(output)
-
-    return
+        current += 1
+        if current == maxtiles:
+            break
+    print "OK: read/write"
 
     f = partial(worker, process, overwrite=True)
+    current = 0
+    work_tiles = []
+    for tile in process.get_process_tiles(12):
+        work_tiles.append(tile)
+        current += 1
+        if current == maxtiles:
+            break
     try:
-        for zoom in reversed(process.config.zoom_levels):
-            pool = Pool()
-            try:
-                for raw_output in pool.imap_unordered(
-                    f, process.get_process_tiles(zoom), chunksize=8):
-                    process.write(raw_output)
-            except KeyboardInterrupt:
-                pool.terminate()
-                break
-            except:
-                raise
-            finally:
-                pool.close()
-                pool.join()
+        pool = Pool()
+        try:
+            for raw_output in pool.imap_unordered(
+                f, work_tiles):
+                process.write(raw_output)
+                print raw_output.id, "processed"
+        except KeyboardInterrupt:
+            pool.terminate()
+        except:
+            raise
+        finally:
+            pool.close()
+            pool.join()
         print "OK: multiprocessing"
     except:
         print "FAILED: multiprocessing"

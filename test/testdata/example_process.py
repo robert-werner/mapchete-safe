@@ -19,7 +19,6 @@ class Process(MapcheteProcess):
     def execute(self):
         """User defined process."""
         # Reading and writing data works like this:
-        print self.tile
         with self.open("file1", resampling="bilinear") as raster_file:
             if raster_file.is_empty(1):
                 return "empty"

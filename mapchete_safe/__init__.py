@@ -153,6 +153,8 @@ class InputTile(base.InputTile):
                         new_data = read_raster_window(
                             granule["band_path"][band_index], self.tile,
                             indexes=1, resampling=self.resampling).next()
+                        if new_data.all() is ma.masked:
+                            continue
                         band = ma.masked_array(
                             data=np.where(band.mask, new_data.data, band.data),
                             mask=np.where(
