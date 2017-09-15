@@ -5,12 +5,19 @@ import s2reader
 import numpy as np
 import numpy.ma as ma
 from rasterio.crs import CRS
-from tempfile import NamedTemporaryFile
 from s2reader.s2reader import BAND_IDS
 
 from mapchete.formats import base
 from mapchete.io.vector import reproject_geometry
 from mapchete.io.raster import read_raster_window
+
+
+METADATA = {
+    "driver_name": "SAFE",
+    "data_type": "raster",
+    "mode": "r",
+    "file_extensions": ["SAFE", "zip", "ZIP"]
+}
 
 
 class InputData(base.InputData):
@@ -25,8 +32,11 @@ class InputData(base.InputData):
 
     def __init__(self, input_params):
         """Initialize."""
-        super(InputData, self).__init__(input_params)
         self.path = input_params["path"]
+        self.pyramid = input_params["pyramid"]
+        self.pixelbuffer = input_params["pixelbuffer"]
+        self.crs = self.pyramid.crs
+        self.srid = self.pyramid.srid
         with s2reader.open(self.path) as s2dataset:
             self.s2metadata = dict(
                 path=s2dataset.path,
@@ -85,11 +95,8 @@ class InputTile(base.InputTile):
         else:
             return ma.masked_array(
                 data=np.stack(self._bands_from_cache(indexes=band_indexes)),
-                mask=np.stack(
-                    self.mask()
-                    for band in band_indexes
-                    )
-                )
+                mask=np.stack(self.mask() for band in band_indexes)
+            )
 
     def mask(self):
         """Nondata mask."""
@@ -125,16 +132,15 @@ class InputTile(base.InputTile):
 
     def _get_band_paths(self, band_index=None):
         """Cache Sentinel Granule paths."""
-        assert isinstance(band_index, int)
         if band_index not in self._band_paths_cache:
-            # Group granule band paths by SRID as gdalbuildvrt cannot
-            # handle multiple images with different SRID:
+            # group granule band paths by SRID
             band_paths = {}
             for granule in self.s2metadata["granules"]:
                 if granule["srid"] not in band_paths:
                     band_paths[granule["srid"]] = []
                 band_paths[granule["srid"]].append(
-                    granule["band_path"][band_index])
+                    granule["band_path"][band_index]
+                )
             self._band_paths_cache[band_index] = band_paths
         return self._band_paths_cache[band_index]
 
@@ -143,12 +149,11 @@ class InputTile(base.InputTile):
         band_indexes = self._get_band_indexes(indexes)
         for band_index in band_indexes:
             if band_index not in self._np_band_cache:
-                empty_band = ma.masked_array(
-                    ma.zeros(self.tile.shape, dtype=self.dtype), mask=True)
-                if not len(self._get_band_paths(band_index)):
-                    band = empty_band
-                else:
-                    band = empty_band
+                # flatten all granules on one output array
+                band = ma.masked_array(
+                    ma.zeros(self.tile.shape, dtype=self.dtype), mask=True
+                )
+                if len(self._get_band_paths(band_index)):
                     for granule in self.s2metadata["granules"]:
                         new_data = read_raster_window(
                             granule["band_path"][band_index], self.tile,

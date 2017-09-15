@@ -4,6 +4,7 @@
 from mapchete import MapcheteProcess
 import numpy as np
 
+
 class Process(MapcheteProcess):
     """Main process class."""
 
@@ -19,11 +20,11 @@ class Process(MapcheteProcess):
     def execute(self):
         """User defined process."""
         # Reading and writing data works like this:
-        with self.open("file1", resampling="bilinear") as raster_file:
+        with self.open("file1") as raster_file:
             if raster_file.is_empty(1):
                 return "empty"
 
             return [
                 np.clip(band, 0, 255)
-                for band in raster_file.read([3, 2, 1])
+                for band in raster_file.read([4, 3, 2])
             ]

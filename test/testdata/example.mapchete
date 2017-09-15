@@ -2,8 +2,8 @@
 process_file: example_process.py
 process_minzoom: 8
 process_maxzoom: 12
-input_files:
-    file1: None
+input:
+    s2: zipped_safe/S2A_MSIL1C_20170809T100031_N0205_R122_T32TQT_20170809T100028.zip
 
 output:
     type: geodetic

@@ -4,15 +4,15 @@ from setuptools import setup
 
 setup(
     name='mapchete-safe',
-    version='0.1',
+    version='0.2',
     description='Mapchete SAFE file read extension',
     author='Joachim Ungar',
-    author_email='joachim.ungar@gmail.com',
+    author_email='joachim.ungar@eox.at',
     url='https://github.com/ungarj/mapchete-safe',
     license='MIT',
     packages=['mapchete_safe'],
     install_requires=[
-        'mapchete>=0.4',
+        'mapchete>=0.6',
         's2reader'
         ],
     entry_points={'mapchete.formats.drivers': ['safe=mapchete_safe']},
@@ -22,5 +22,7 @@ setup(
         'Topic :: Scientific/Engineering :: GIS',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
-    ]
+    ],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )
