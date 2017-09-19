@@ -38,21 +38,23 @@ class InputData(base.InputData):
         self.crs = self.pyramid.crs
         self.srid = self.pyramid.srid
         with s2reader.open(self.path) as s2dataset:
-            self.s2metadata = dict(
-                path=s2dataset.path,
-                footprint=s2dataset.footprint,
-                granules=[
-                    dict(
-                        srid=granule.srid,
-                        footprint=granule.footprint,
-                        band_path={
-                            index: granule.band_path(_id)
+            self.s2metadata = {
+                "path": s2dataset.path,
+                "footprint": s2dataset.footprint,
+                "granules": [
+                    {
+                        "srid": granule.srid,
+                        "footprint": granule.footprint,
+                        "band_path": {
+                            index: granule.band_path(
+                                _id, for_gdal=True, absolute=True
+                            )
                             for index, _id in zip(range(1, 14), BAND_IDS)
-                            }
-                    )
+                        }
+                    }
                     for granule in s2dataset.granules
                 ]
-            )
+            }
 
     def open(self, tile, **kwargs):
         """Return InputTile."""
@@ -113,12 +115,10 @@ class InputTile(base.InputTile):
             return True
 
         # empty if source band(s) are empty
-        all_bands_empty = True
         for band in self._bands_from_cache(band_indexes):
             if not band.mask.all():
-                all_bands_empty = False
-                break
-        return all_bands_empty
+                return False
+        return True
 
     def _get_band_indexes(self, indexes=None):
         """Return valid band indexes."""
