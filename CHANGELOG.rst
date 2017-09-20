@@ -5,11 +5,11 @@ Changelog
 ---
 0.2
 ---
-
-* introducing pytest
+* introduced pytest
+* rewrote most parts of the API
+* added example process
 
 ---
 0.1
 ---
-
 * initial release

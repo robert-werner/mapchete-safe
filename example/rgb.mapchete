@@ -1,0 +1,28 @@
+process_file: example_process.py
+process_minzoom: 8
+process_maxzoom: 15
+input: from_command_line
+output:
+    type: mercator
+    format: PNG
+    path: output
+metatiling: 4
+
+resampling: cubic
+mask_clouds: true
+mask_white_areas: true
+sigmoidal_contrast: 8
+sigmoidal_bias: 0.4
+red_gamma: 1.2
+green_gamma: 1.2
+blue_gamma: 1.1
+saturation: 1.3
+
+# If baselevels are activated, only zoom levels 13, 14 and 15 are actually
+# processed using the original SAFE file while the other zoom levels (8 to 12)
+# are interpolated using existing output:
+
+# baselevels:
+#     min: 13
+#     max: 15
+#     lower: bilinear

@@ -155,8 +155,7 @@ class InputTile(base.InputTile):
         mask_nodata : bool
             mask out nodata (values in all bands equal 0) areas (default: True)
         mask_clouds : bool
-            mask out clouds; only works if 'with_cloudmasks' option is enabled
-            (default: False)
+            mask out clouds (default: False)
         mask_white_areas : bool
             mask out white (values over 4096) areas; might just work on RGB
             bands! (default: False)

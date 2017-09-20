@@ -13,7 +13,7 @@ setup(
     packages=['mapchete_safe'],
     install_requires=[
         'mapchete>=0.7',
-        's2reader',
+        's2reader>=0.4',
         'cached_property'
         ],
     entry_points={'mapchete.formats.drivers': ['safe=mapchete_safe']},
