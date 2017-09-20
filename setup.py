@@ -12,8 +12,9 @@ setup(
     license='MIT',
     packages=['mapchete_safe'],
     install_requires=[
-        'mapchete>=0.6',
-        's2reader'
+        'mapchete>=0.7',
+        's2reader',
+        'cached_property'
         ],
     entry_points={'mapchete.formats.drivers': ['safe=mapchete_safe']},
     classifiers=[

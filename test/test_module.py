@@ -30,6 +30,9 @@ def test_input_data():
         assert config["input"]["s2"].path
         assert config["input"]["s2"].exists()
         assert config["input"]["s2"].bbox().is_valid
+        assert isinstance(config["input"]["s2"].cloudmask, list)
+        for mask in config["input"]["s2"].cloudmask:
+            assert mask.is_valid
 
 
 def test_input_tile():
@@ -39,14 +42,14 @@ def test_input_tile():
         config = mp.config.at_zoom(zoom)
         tile = config["input"]["s2"].open(mp.get_process_tiles(zoom).next())
         assert isinstance(tile, base.InputTile)
+        assert not tile.is_empty()
         # all read() related functions will raise an RasterioIOError because
         # test dataset does not contain JP2 files
         with pytest.raises(RasterioIOError):
             tile.read()
-        with pytest.raises(RasterioIOError):
-            tile.mask()
-        with pytest.raises(RasterioIOError):
-            tile.is_empty()
+        assert tile.cloudmask
+        for mask in tile.cloudmask:
+            assert mask.is_valid
 
 
 def test_empty_input_tile():
