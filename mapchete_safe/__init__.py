@@ -78,6 +78,7 @@ class InputData(base.InputData):
                 dst_crs=self.crs
             )
             for granule in self.s2metadata["granules"]
+            if not granule["cloudmask"].is_empty
         ]
 
     @cached_property
