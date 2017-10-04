@@ -3,6 +3,11 @@ Changelog
 #########
 
 ---
+0.3
+---
+* skip empty Polygons
+
+---
 0.2
 ---
 * introduced pytest
