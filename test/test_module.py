@@ -37,10 +37,12 @@ def test_input_data():
 
 def test_input_tile():
     """Input tile properties and methods."""
-    zoom = 13
+    test_tile = (13, 241, 1098)
     with mapchete.open(EXAMPLE_MAPCHETE) as mp:
-        config = mp.config.at_zoom(zoom)
-        tile = config["input"]["s2"].open(mp.get_process_tiles(zoom).next())
+        config = mp.config.at_zoom(test_tile[0])
+        tile = config["input"]["s2"].open(
+            mp.config.process_pyramid.tile(*test_tile)
+        )
         assert isinstance(tile, base.InputTile)
         assert not tile.is_empty()
         # all read() related functions will raise an RasterioIOError because

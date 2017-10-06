@@ -96,7 +96,11 @@ class InputData(base.InputData):
     def open(self, tile, **kwargs):
         """Return InputTile."""
         return InputTile(
-            tile, self, self.s2metadata, self.cloudmask, self.nodatamask,
+            tile,
+            self,
+            self.s2metadata,
+            [f for f in self.cloudmask if f.intersects(tile.bbox)],
+            self.nodatamask,
             **kwargs
         )
 
@@ -205,7 +209,7 @@ class InputTile(base.InputTile):
                     data=np.where(band.mask, new_data.data, band.data),
                     mask=np.where(band.mask, new_data.mask, band.mask)
                 )
-                bands.append(band)
+            bands.append(band)
 
         # get combined mask
         mask = self._mask(bands, mask_nodata, mask_white_areas, mask_clouds)

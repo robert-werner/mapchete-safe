@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='mapchete-safe',
-    version='0.3',
+    version='0.4',
     description='Mapchete SAFE file read extension',
     author='Joachim Ungar',
     author_email='joachim.ungar@eox.at',
