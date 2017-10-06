@@ -3,6 +3,12 @@ Changelog
 #########
 
 ---
+0.4
+---
+* fixed combining bands from multiple granules
+* filter cloudmasks before instaniating InputTile
+
+---
 0.3
 ---
 * skip empty Polygons
