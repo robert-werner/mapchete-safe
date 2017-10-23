@@ -3,6 +3,11 @@ Changelog
 #########
 
 ---
+0.5
+---
+* updated to new mapchete 0.10 API
+
+---
 0.4
 ---
 * fixed combining bands from multiple granules
