@@ -99,7 +99,14 @@ class InputData(base.InputData):
             tile,
             self,
             self.s2metadata,
-            [f for f in self.cloudmask if f.intersects(tile.bbox)],
+            [
+                j
+                for j in [
+                    i.intersection(tile.bbox)
+                    for i in self.cloudmask
+                ]
+                if not j.is_empty
+            ],
             self.nodatamask,
             **kwargs
         )
