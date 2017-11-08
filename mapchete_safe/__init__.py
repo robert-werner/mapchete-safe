@@ -253,7 +253,7 @@ class InputTile(base.InputTile):
         #     if mask_nodata and self.nodatamask else None
         # )
         nodata_mask = (
-            reduce(add, [np.where(b.mask, True, False) for b in bands])
+            reduce(mul, [np.where(b.mask, True, False) for b in bands])
             if mask_nodata else None
         )
         # mask out white areas (= where all band values are >=4096)
