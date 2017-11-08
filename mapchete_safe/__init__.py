@@ -49,6 +49,7 @@ class InputData(base.InputData):
                 "granules": [
                     {
                         "id": granule.granule_identifier,
+                        "datastrip_id": granule.datastrip_identifier,
                         "srid": granule.srid,
                         "footprint": reproject_geometry(
                             granule.footprint,
@@ -98,16 +99,13 @@ class InputData(base.InputData):
         return InputTile(
             tile,
             self,
-            self.s2metadata,
-            [
+            s2metadata=self.s2metadata,
+            cloudmask=[
                 j
-                for j in [
-                    i.intersection(tile.bbox)
-                    for i in self.cloudmask
-                ]
+                for j in [i.intersection(tile.bbox) for i in self.cloudmask]
                 if not j.is_empty
             ],
-            self.nodatamask,
+            nodatamask=self.nodatamask,
             **kwargs
         )
 
@@ -131,8 +129,8 @@ class InputTile(base.InputTile):
     """Target Tile representation of input data."""
 
     def __init__(
-        self, tile, safe_file, s2metadata, cloudmask, nodatamask,
-        resampling="nearest"
+        self, tile, safe_file, s2metadata=None, cloudmask=None,
+        nodatamask=None, resampling="nearest"
     ):
         """Initialize."""
         self.tile = tile
