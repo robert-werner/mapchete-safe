@@ -206,7 +206,9 @@ class InputTile(base.InputTile):
                     granule["band_path"][band_index],
                     self.tile,
                     indexes=[1],
-                    resampling=self.resampling
+                    resampling=self.resampling,
+                    src_nodata=0,
+                    dst_nodata=0
                 )
                 if new_data.mask.all():
                     continue
