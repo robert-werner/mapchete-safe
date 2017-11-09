@@ -4,8 +4,6 @@ import os
 import s2reader
 import numpy as np
 import numpy.ma as ma
-from operator import mul, add
-from functools import reduce
 from cached_property import cached_property
 from rasterio.crs import CRS
 from rasterio.features import geometry_mask
@@ -226,7 +224,7 @@ class InputTile(base.InputTile):
             if return_empty:
                 return self._empty(len(band_indexes))
             else:
-                raise MapcheteEmptyInputTile()
+                raise MapcheteEmptyInputTile("all values masked")
         else:
             nd_mask = np.stack([mask for _ in band_indexes])
             return ma.masked_array(
@@ -241,7 +239,11 @@ class InputTile(base.InputTile):
     def _mask(
         self, bands, mask_nodata=None, mask_white_areas=None, mask_clouds=None
     ):
-        # if mask_nodata: combine masks of all bands
+        # if mask_nodata: mask where any band value is 0
+        nodata_mask = (
+            np.any(np.stack([b.mask for b in bands]), axis=0).astype(np.bool)
+            if mask_nodata else None
+        )
         # TODO: use original vector mask for nodata values
         # nodata_mask = (
         #     geometry_mask(
@@ -252,31 +254,28 @@ class InputTile(base.InputTile):
         #     )
         #     if mask_nodata and self.nodatamask else None
         # )
-        nodata_mask = (
-            reduce(mul, [np.where(b.mask, True, False) for b in bands])
-            if mask_nodata else None
-        )
-        # mask out white areas (= where all band values are >=4096)
+
+        # if mask_clouds: rasterize vector cloud mask
+        cloud_mask = geometry_mask(
+                self.cloudmask, self.tile.shape, self.tile.affine, invert=True
+            ) if mask_clouds and self.cloudmask else None
+
+        # if mask_white_areas: mask where all band values are >=4096
         white_mask = (
-            reduce(mul, [np.where(b >= 4096, True, False) for b in bands])
+            np.all(
+                np.stack([np.where(b >= 4096, True, False) for b in bands]),
+                axis=0
+            ).astype(np.bool)
             if mask_white_areas else None
         )
-        # rasterize cloud mask
-        cloud_mask = (
-            geometry_mask(
-                self.cloudmask,
-                self.tile.shape,
-                self.tile.affine,
-                invert=True  # WTF
-            )
-            if mask_clouds and self.cloudmask else None
-        )
         # combine all masks
-        masks = (nodata_mask, cloud_mask, white_mask)
-        if any([m is not None for m in masks]):
-            return reduce(add, [x for x in masks if x is not None])
+        masks = [
+            m for m in [nodata_mask, cloud_mask, white_mask] if m is not None
+        ]
+        if masks:
+            return np.any(np.stack(masks), axis=0).astype(np.bool)
         else:
-            return np.zeros(self.tile.shape)
+            return np.zeros(self.tile.shape).astype(np.bool)
 
     def _get_band_indexes(self, indexes=None):
         """Return valid band indexes."""
