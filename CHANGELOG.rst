@@ -3,6 +3,12 @@ Changelog
 #########
 
 ---
+0.6
+---
+* group input granules by datastrip ID to make sure no redundant data is read
+* make better use of NumPy to combine masks
+
+---
 0.5
 ---
 * updated to new mapchete 0.10 API

@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='mapchete-safe',
-    version='0.5',
+    version='0.6',
     description='Mapchete SAFE file read extension',
     author='Joachim Ungar',
     author_email='joachim.ungar@eox.at',
@@ -12,7 +12,7 @@ setup(
     license='MIT',
     packages=['mapchete_safe'],
     install_requires=[
-        'mapchete>=0.10',
+        'mapchete>=0.11',
         's2reader>=0.4',
         'cached_property'
         ],
