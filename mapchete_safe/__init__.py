@@ -33,7 +33,7 @@ class InputData(base.InputData):
         "file_extensions": ["SAFE", "zip", "ZIP"]
     }
 
-    def __init__(self, input_params):
+    def __init__(self, input_params, **kwargs):
         """Initialize."""
         self.path = input_params["path"]
         self.pyramid = input_params["pyramid"]
@@ -211,14 +211,13 @@ class InputTile(base.InputTile):
                 if new_data.mask.all():
                     continue
                 band = ma.masked_array(
-                    data=np.where(band.mask, new_data.data, band.data),
-                    mask=np.where(band.mask, new_data.mask, band.mask)
+                    data=np.where(new_data == 0, band.data, new_data),
+                    mask=np.where(new_data == 0, True, False)
                 )
             bands.append(band)
 
         # get combined mask
         mask = self._mask(bands, mask_nodata, mask_white_areas, mask_clouds)
-
         # skip if emtpy
         if mask.all():
             if return_empty:
