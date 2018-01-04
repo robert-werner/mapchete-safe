@@ -3,6 +3,11 @@ Changelog
 #########
 
 ---
+0.7
+---
+* fixed nodata masking
+
+---
 0.6
 ---
 * group input granules by datastrip ID to make sure no redundant data is read
