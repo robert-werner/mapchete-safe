@@ -51,6 +51,14 @@ return_empty : bool
 Installation
 ------------
 
+Requirements
+------------
+
+Python = 2.7
+Mapchete = 0.13
+
+Python >3 is currently not supported.
+
 Dependencies
 ------------
 
@@ -79,6 +87,11 @@ Or clone the repository and run:
     pip install -r requirements.txt
     python setup.py install
 
+You can also create a Anaconda (conda) environment via environment.yml file:
+
+.. code-block:: shell
+
+    conda env create -f environment.yml
 
 Tests
 -----
